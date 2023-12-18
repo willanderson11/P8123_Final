@@ -1,0 +1,113 @@
+---
+title: "p8123_final"
+author: "Farizah Rob"
+date: "2023-12-14"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(survey)
+library(ggsurvey)
+library(tableone)
+```
+
+
+```{r}
+load("/Users/emilyypotts/Desktop/nhanes_data.rda") #change this
+load("/Users/emilyypotts/Desktop/nhanes_key.rda") #change this
+load("/Users/emilyypotts/Desktop/key_guide.rda") #change this
+```
+
+**Problem statement:** Controlling blood pressure (BP) reduces the risk for cardiovascular disease. However, the prevalence of BP control (i.e., systolic BP < 140 and diastolic BP < 90) among US adults with hypertension has decreased since 2013. We invite teams to analyze publicly available data from US adults to help identify potential causes or correlates of worsening BP control among US adults with hypertension over the past decade, as this may allow for development of effective interventions to help control BP and prevent cardiovascular disease.
+
+
+### Svydesign and subset for hypertension patients 2013 onwards
+
+```{r}
+dstrat <- svydesign(ids=~svy_psu, strata=~svy_strata, weights=~svy_weight_mec, data=nhanes_data, nest=TRUE) 
+
+htsub <- subset(dstrat, svy_subpop_htn==1) #limited to hypertension patients
+
+htsub2 <- subset(htsub, svy_year=="2013-2014" | svy_year=="2015-2016" | svy_year=="2017-2020") #limited to hypertension patents from 2013 onwards
+```
+
+
+### Some EDA
+
+The **outcome** of interest -> **bp_control_140_90** OR **bp_uncontrolled_140_90**
+
+```{r}
+#age -> so for older people, BP control is definitely lower
+age <- svyby(~factor(bp_control_140_90), ~factor(demo_age_cat), design=htsub2, svymean, na.rm=TRUE)
+barplot(age, legend.text=c("BP uncontrolled", "BP controlled"), col=c("pink", "purple"), main="Proportion of BP control by age category") 
+
+#gender -> not really any difference 
+gender <- svyby(~factor(bp_control_140_90), ~factor(demo_gender), design=htsub2, svymean, na.rm=TRUE)
+barplot(gender, legend.text=c("BP uncontrolled", "BP controlled"), col=c("pink", "purple"), main="Proportion of BP control by gender") #not much of a change
+
+#race -> for Black people vs non-Black people, BP control is lower
+race <- svyby(~factor(bp_control_140_90), ~factor(demo_race_black), design=htsub2, svymean, na.rm=TRUE)
+barplot(race, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        names.arg=c("Non-Black", "Black"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright"), 
+        main="Proportion of BP control by race (non-Black vs Black)")
+
+#diabetes
+diabetes <- svyby(~factor(bp_control_140_90), ~factor(cc_diabetes), design=htsub2, svymean, na.rm=TRUE)
+barplot(diabetes, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        names.arg=c("No Diabetes", "Diabetes"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright"), 
+        main="Proportion of BP control by diabetes")
+
+#ckd
+ckd <- svyby(~factor(bp_control_140_90), ~factor(cc_ckd), design=htsub2, svymean, na.rm=TRUE)
+barplot(ckd, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        names.arg=c("No CKD", "CKD"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright"), 
+        main="Proportion of BP control by CKD")
+
+#bmi 
+bmi <- svyby(~factor(bp_control_140_90), ~factor(cc_bmi), design=htsub2, svymean, na.rm=TRUE)
+barplot(bmi, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright"), 
+        main="Proportion of BP control by BMI")
+
+#meds recommended -> 100% for those with uncontrolled BP
+# look at med recommended and meds taken ratio by different subgroups?
+
+table(nhanes_data$bp_med_recommended_jnc7, nhanes_data$bp_med_use) #48% of people recommended medication do not take medication
+
+svyCreateCatTable(vars= c("bp_med_recommended_jnc7" ,"bp_med_use"), 
+                  strata="demo_race", 
+                  data=htsub2) #across all races, the % of med use is lower than % recommended -? this gap is highest for NH Black
+
+
+#for table 1 -> age category, gender, race, BMI, smoking status, diabetes, CKD, cholesterol, recommended medication use, medication use 
+
+tab1 <- svyCreateTableOne(vars = c("demo_age_cat", "demo_race", "bp_med_recommended_jnc7", "bp_med_recommended_accaha", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any"), strata="bp_control_140_90", data=htsub2)
+
+```
+
+### Regression models - really don't know which variables to select 
+
+using the **bp_uncontrolled_140_90** variable instead of bp_control for regression
+
+```{r}
+m1 <- svyglm(bp_uncontrolled_140_90 ~ demo_age_cat + demo_race + demo_gender + cc_smoke + cc_bmi+ cc_diabetes + cc_ckd + cc_cvd_any + chol_trig + chol_ldl + chol_hdl, design = htsub2, family=quasibinomial()) #does it make sense to add bp medication use and recommended variables? they are prescribed bc of the uncontrolled bp
+
+#need to set BMI reference value to normal level rather than underweight
+
+summary(m1)
+
+#need to look into subset of high cholesterol and hypertension?
+```
+
