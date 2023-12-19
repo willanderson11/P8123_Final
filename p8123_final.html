@@ -388,9 +388,9 @@ display: none;
 <pre class="r"><code>library(ggsurvey)</code></pre>
 <pre><code>## Loading required package: hexbin</code></pre>
 <pre class="r"><code>library(tableone)</code></pre>
-<pre class="r"><code>load(&quot;nhanes_data.rda&quot;) #change this
-load(&quot;nhanes_key.rda&quot;) #change this
-load(&quot;key_guide.rda&quot;) #change this</code></pre>
+<pre class="r"><code>load(&quot;./data/nhanes_data.rda&quot;) #put files into data folder so everyone can run this
+load(&quot;./data/nhanes_key.rda&quot;) 
+load(&quot;./data/key_guide.rda&quot;)</code></pre>
 <p><strong>Problem statement:</strong> Controlling blood pressure (BP)
 reduces the risk for cardiovascular disease. However, the prevalence of
 BP control (i.e., systolic BP &lt; 140 and diastolic BP &lt; 90) among
@@ -535,6 +535,104 @@ summary(m1)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <pre class="r"><code>#need to look into subset of high cholesterol and hypertension?</code></pre>
+</div>
+<div id="modeling-medication-use-with-bp_uncontrolled_140_90-outcome" class="section level3">
+<h3>Modeling medication use with bp_uncontrolled_140_90 outcome</h3>
+<p>Model is limited to survey design subset of hypertension patients
+from 2013-2020. We selected medication variables concerning
+self-reported blood pressure medication use (yes/no), the number of
+antihypertensive medication pills taken per day, the use of vasodilators
+(yes/no), alpha and beta blockers (yes/no), the use of angiotensin
+receptor blockers, and the use of statins or other cholesterol
+medication for cholesterol control (yes/no). These variables were
+selected based on their prior association with blood pressure levels in
+existing clinical trials and research studies.</p>
+<pre class="r"><code>meds_binary &lt;- svyglm(bp_uncontrolled_140_90 ~ bp_med_use + bp_med_n_pills + bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + chol_med_statin + chol_med_use, design = htsub2, family = quasibinomial())
+
+summary(meds_binary)</code></pre>
+<pre><code>## 
+## Call:
+## svyglm(formula = bp_uncontrolled_140_90 ~ bp_med_use + bp_med_n_pills + 
+##     bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + 
+##     chol_med_statin + chol_med_use, design = htsub2, family = quasibinomial())
+## 
+## Survey design:
+## subset(htsub, svy_year == &quot;2013-2014&quot; | svy_year == &quot;2015-2016&quot; | 
+##     svy_year == &quot;2017-2020&quot;)
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                -2.18989    0.06676 -32.800  &lt; 2e-16 ***
+## bp_med_useYes               0.47223    0.18528   2.549  0.01437 *  
+## bp_med_n_pillsOne           0.54676    0.24644   2.219  0.03172 *  
+## bp_med_n_pillsTwo           0.68321    0.25493   2.680  0.01032 *  
+## bp_med_n_pillsThree         0.66705    0.30127   2.214  0.03205 *  
+## bp_med_n_pillsFour or more  0.67142    0.31766   2.114  0.04025 *  
+## bp_med_vasodYes             0.39992    0.38925   1.027  0.30984    
+## bp_med_alphaYes             0.08106    0.33994   0.238  0.81263    
+## bp_med_betaYes              0.18103    0.10856   1.667  0.10252    
+## bp_med_angiotenYes          0.40086    0.14562   2.753  0.00855 ** 
+## chol_med_statinYes          0.14702    0.39001   0.377  0.70802    
+## chol_med_useYes             0.01408    0.36954   0.038  0.96978    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for quasibinomial family taken to be 1.011587)
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<p>Use of blood pressure medications, number of antihypertensive pills
+(1-4+), and angiotensin receptor blockers, were significantly associated
+with having uncontrolled blood pressure. The use of vasodilators,
+statins or other cholesterol medication, alpha and beta blockers, had
+non-statistically significant associations with having uncontrolled
+blood pressure.</p>
+</div>
+<div id="modeling-medication-use-with-bp_sys_mean-outcome" class="section level3">
+<h3>Modeling medication use with bp_sys_mean outcome</h3>
+<p>We now model the continuous outcome of the average systolic blood
+pressure with the same medication covariates among those with
+hypertension from 2013-2020.</p>
+<pre class="r"><code>meds_continuous &lt;- svyglm(bp_sys_mean ~ bp_med_use + bp_med_n_pills + bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + chol_med_statin + chol_med_use, design = htsub2, family = gaussian())
+
+summary(meds_continuous)</code></pre>
+<pre><code>## 
+## Call:
+## svyglm(formula = bp_sys_mean ~ bp_med_use + bp_med_n_pills + 
+##     bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + 
+##     chol_med_statin + chol_med_use, design = htsub2, family = gaussian())
+## 
+## Survey design:
+## subset(htsub, svy_year == &quot;2013-2014&quot; | svy_year == &quot;2015-2016&quot; | 
+##     svy_year == &quot;2017-2020&quot;)
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                118.6846     0.2625 452.195  &lt; 2e-16 ***
+## bp_med_useYes                5.9810     1.3092   4.568 3.95e-05 ***
+## bp_med_n_pillsOne            3.0950     1.2975   2.385   0.0214 *  
+## bp_med_n_pillsTwo            3.0745     1.6920   1.817   0.0760 .  
+## bp_med_n_pillsThree          3.7637     1.9311   1.949   0.0577 .  
+## bp_med_n_pillsFour or more   3.1318     3.7009   0.846   0.4020    
+## bp_med_vasodYes              7.1119     4.7163   1.508   0.1387    
+## bp_med_alphaYes              1.1634     3.6998   0.314   0.7547    
+## bp_med_betaYes               1.7999     1.0073   1.787   0.0808 .  
+## bp_med_angiotenYes           4.0761     1.3338   3.056   0.0038 ** 
+## chol_med_statinYes          -0.2361     2.6887  -0.088   0.9304    
+## chol_med_useYes              2.6995     2.5886   1.043   0.3027    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for gaussian family taken to be 261.5449)
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<p>The use of blood pressure medications, number of antihypertensive
+pills (1), and angiotensin receptor blockers were significantly
+associated with mean systolic blood pressure levels in those with
+hypertension from 2013-2020. The use of (2-4+) antihypertensive pills
+per day, vasodilators, alpha and beta blockers, and statins and other
+cholesterol medications, had non-statistically significant associations
+with mean systolic blood pressure levels in those with hypertension from
+2013-2020.</p>
 </div>
 
 
