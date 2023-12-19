@@ -2,7 +2,7 @@
 title: "p8123_final"
 author: "Farizah Rob"
 date: "2023-12-14"
-output: html_document
+output: pdf_document
 ---
 
 ```{r}
@@ -96,24 +96,31 @@ svyCreateCatTable(vars= c("bp_med_recommended_jnc7" ,"bp_med_use"),
 ```{r}
 #for table 1 -> age category, gender, race, BMI, smoking status, diabetes, CKD, cholesterol, recommended medication use, medication use
 
-tab1 <- tbl_svysummary(data = htsub2, by = "bp_control_140_90", include = c("demo_age_cat", "demo_gender", "demo_race", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any", "bp_med_recommended_jnc7", "bp_med_recommended_accaha", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use"),
+# removed "bp_med_recommended_jnc7", "bp_med_recommended_accaha" for space
+
+# didn't they say something in class about the Rao and Scott being wrong in R? not sure if we should include p-values here
+
+reset_gtsummary_theme()
+theme_gtsummary_compact()
+tab1 <- tbl_svysummary(data = htsub2, by = "bp_control_140_90", include = c("demo_age_cat", "demo_gender", "demo_race", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use"),
                        label = list(demo_age_cat ~ "Age", 
                                     demo_gender ~ "Gender", 
                                     demo_race ~ "Race",
                                     cc_bmi ~ "BMI", 
-                                    cc_ckd ~ "Chronic kidney disease", 
+                                    cc_ckd ~ "Chronic Kidney Disease", 
                                     cc_diabetes ~ "Diabetes", 
-                                    cc_cvd_any ~ "Any CVD",
-                                    bp_med_recommended_jnc7 ~ "Medication JNC7 ? ",
-                                    bp_med_recommended_accaha ~ "Medication Accaha ?", 
+                                    cc_cvd_any ~ "Cardiovascular Disease",
                                     bp_med_use ~ "BP Medication Use", 
                                     chol_total ~ "Total Cholesterol", 
                                     chol_hdl ~ "HDL", 
                                     chol_ldl ~ "LDL", 
                                     chol_trig ~ "Triglycerides",
-                                    chol_med_use ~ "Cholesterol Medication Use")) %>% add_p() %>%  add_stat_label() %>% add_overall
+                                    chol_med_use ~ "Cholesterol Medication Use")) %>% add_p() %>%  add_stat_label() %>% modify_caption("**Subject Characteristics (Survey Weighted)**") %>% bold_labels() %>% 
+  italicize_levels()
 
 tab1
+
+
 ```
 
 ### Regression models - really don't know which variables to select 
