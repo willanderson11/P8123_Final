@@ -10,6 +10,7 @@ library(tidyverse)
 library(survey)
 library(ggsurvey)
 library(tableone)
+library(gtsummary)
 ```
 
 
@@ -17,7 +18,6 @@ library(tableone)
 load("./data/nhanes_data.rda") #put files into data folder so everyone can run this
 load("./data/nhanes_key.rda") 
 load("./data/key_guide.rda")
-
 ```
 
 **Problem statement:** Controlling blood pressure (BP) reduces the risk for cardiovascular disease. However, the prevalence of BP control (i.e., systolic BP < 140 and diastolic BP < 90) among US adults with hypertension has decreased since 2013. We invite teams to analyze publicly available data from US adults to help identify potential causes or correlates of worsening BP control among US adults with hypertension over the past decade, as this may allow for development of effective interventions to help control BP and prevent cardiovascular disease.
@@ -90,12 +90,30 @@ table(nhanes_data$bp_med_recommended_jnc7, nhanes_data$bp_med_use) #48% of peopl
 svyCreateCatTable(vars= c("bp_med_recommended_jnc7" ,"bp_med_use"), 
                   strata="demo_race", 
                   data=htsub2) #across all races, the % of med use is lower than % recommended -? this gap is highest for NH Black
+```
 
 
-#for table 1 -> age category, gender, race, BMI, smoking status, diabetes, CKD, cholesterol, recommended medication use, medication use 
+```{r}
+#for table 1 -> age category, gender, race, BMI, smoking status, diabetes, CKD, cholesterol, recommended medication use, medication use
 
-tab1 <- svyCreateTableOne(vars = c("demo_age_cat", "demo_race", "bp_med_recommended_jnc7", "bp_med_recommended_accaha", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any"), strata="bp_control_140_90", data=htsub2)
+tab1 <- tbl_svysummary(data = htsub2, by = "bp_control_140_90", include = c("demo_age_cat", "demo_gender", "demo_race", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any", "bp_med_recommended_jnc7", "bp_med_recommended_accaha", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use"),
+                       label = list(demo_age_cat ~ "Age", 
+                                    demo_gender ~ "Gender", 
+                                    demo_race ~ "Race",
+                                    cc_bmi ~ "BMI", 
+                                    cc_ckd ~ "Chronic kidney disease", 
+                                    cc_diabetes ~ "Diabetes", 
+                                    cc_cvd_any ~ "Any CVD",
+                                    bp_med_recommended_jnc7 ~ "Medication JNC7 ? ",
+                                    bp_med_recommended_accaha ~ "Medication Accaha ?", 
+                                    bp_med_use ~ "BP Medication Use", 
+                                    chol_total ~ "Total Cholesterol", 
+                                    chol_hdl ~ "HDL", 
+                                    chol_ldl ~ "LDL", 
+                                    chol_trig ~ "Triglycerides",
+                                    chol_med_use ~ "Cholesterol Medication Use")) %>% add_p() %>%  add_stat_label() %>% add_overall
 
+tab1
 ```
 
 ### Regression models - really don't know which variables to select 
