@@ -14,7 +14,7 @@ library(tableone)
 
 
 ```{r}
-load("./data/nhanes_data.rda") #put files into data folder so everyone can run this (same for below)
+load("./data/nhanes_data.rda") #put files into data folder so everyone can run this
 load("./data/nhanes_key.rda") 
 load("./data/key_guide.rda")
 ```
@@ -111,3 +111,26 @@ summary(m1)
 #need to look into subset of high cholesterol and hypertension?
 ```
 
+### Modeling medication use with bp_uncontrolled_140_90 outcome
+
+Model is limited to survey design subset of hypertension patients from 2013-2020. We selected medication variables concerning self-reported blood pressure medication use (yes/no), the number of antihypertensive medication pills taken per day, the use of vasodilators (yes/no), alpha and beta blockers (yes/no), the use of angiotensin receptor blockers, and the use of statins or other cholesterol medication for cholesterol control (yes/no). These variables were selected based on their prior association with blood pressure levels in existing clinical trials and research studies. 
+```{r}
+
+meds_binary <- svyglm(bp_uncontrolled_140_90 ~ bp_med_use + bp_med_n_pills + bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + chol_med_statin + chol_med_use, design = htsub2, family = quasibinomial())
+
+summary(meds_binary)
+```
+
+Use of blood pressure medications, number of antihypertensive pills (1-4+), and angiotensin receptor blockers, were significantly associated with having uncontrolled blood pressure. The use of vasodilators, statins or other cholesterol medication, alpha and beta blockers, had non-statistically significant associations with having uncontrolled blood pressure.
+
+### Modeling medication use with bp_sys_mean outcome
+
+We now model the continuous outcome of the average systolic blood pressure with the same medication covariates among those with hypertension from 2013-2020. 
+
+```{r}
+meds_continuous <- svyglm(bp_sys_mean ~ bp_med_use + bp_med_n_pills + bp_med_vasod + bp_med_alpha + bp_med_beta + bp_med_angioten + chol_med_statin + chol_med_use, design = htsub2, family = gaussian())
+
+summary(meds_continuous)
+```
+
+The use of blood pressure medications, number of antihypertensive pills (1), and angiotensin receptor blockers were significantly associated with mean systolic blood pressure levels in those with hypertension from 2013-2020. The use of (2-4+) antihypertensive pills per day, vasodilators, alpha and beta blockers, and statins and other cholesterol medications, had non-statistically significant associations with mean systolic blood pressure levels in those with hypertension from 2013-2020. 
