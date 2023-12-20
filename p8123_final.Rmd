@@ -100,13 +100,7 @@ svyCreateCatTable(vars= c("bp_med_recommended_jnc7" ,"bp_med_use"),
 
 
 ```{r}
-#for table 1 -> age category, gender, race, BMI, smoking status, diabetes, CKD, cholesterol, recommended medication use, medication use
-
-# removed "bp_med_recommended_jnc7", "bp_med_recommended_accaha" for space
-
-# didn't they say something in class about the Rao and Scott being wrong in R? not sure if we should include p-values here
-
-# I don't think we should have p-values in the table 1 since we're not running models yet, just showing mean and standard deviation of the different covariates per outcome - Will
+## table 1
 
 reset_gtsummary_theme()
 theme_gtsummary_compact()
@@ -123,7 +117,7 @@ tab1 <- tbl_svysummary(data = htsub2, by = "bp_control_140_90", include = c("dem
                                     chol_hdl ~ "HDL", 
                                     chol_ldl ~ "LDL", 
                                     chol_trig ~ "Triglycerides",
-                                    chol_med_use ~ "Cholesterol Medication Use")) %>% add_p() %>%  add_stat_label() %>% modify_caption("**Subject Characteristics (Survey Weighted)**") %>% bold_labels() %>% 
+                                    chol_med_use ~ "Cholesterol Medication Use")) %>%  add_stat_label() %>% modify_caption("**Subject Characteristics (Survey Weighted)**") %>% bold_labels() %>% 
   italicize_levels()
 
 tab1
