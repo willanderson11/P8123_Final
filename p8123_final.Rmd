@@ -11,6 +11,7 @@ library(survey)
 library(ggsurvey)
 library(tableone)
 library(gtsummary)
+library(sjPlot)
 ```
 
 
@@ -233,3 +234,14 @@ summary(model_3)
 ```
 
 I added the nested models based on three levels. Should we also make figures based on the significant variables from these models? If these models look good, I will proceed making the table two - Harry
+
+### Forest plot of estimates from models 1-3
+
+```{r}
+axis.labels = c("Ages 45-64", "Ages 65-74", "Ages 75+", "Non-Hispanic Black", "Non-Hispanic Asian", "Hispanic", "Other Race", "Gender: Women", "Former Smoker", "Current Smoker", "BMI 25-30", "BMI 30-35", "BMI 35+", "Has Diabetes", "Has CKD", "Has CVD", "Triglycerides", "LDL Chol", "HDL Chol", "Uses BP Meds", "BP Meds per day: 1", "BP Meds per day: 2", "BP Meds per day: 3", "BP Meds per day: 4+", "Uses Vasodilators", "Uses Alpha-Blockers", "Uses Beta-Blockers", "Uses Angiotens", "Uses Statins", "Uses Cholesterol Meds")
+
+axis.labels <- stringi::stri_reverse(axis.labels)
+
+plot_models(model_1, model_2, model_3, transform = "exp", legend.title = "", show.p = T, grid = T, show.legend = F, m.labels = c("Model 1", "Model 2", "Model 3"))
+```
+
