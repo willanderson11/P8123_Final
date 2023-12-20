@@ -15,8 +15,7 @@ library(sjPlot)
 
 knitr::opts_chunk$set(
   message = FALSE,
-  warning = FALSE,
-  tidy.opts = list(width.cutoff = 60)
+  warning = FALSE
 )
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
