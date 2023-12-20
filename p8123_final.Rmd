@@ -2,7 +2,7 @@
 title: "P8123 Final"
 author: "Farizah Rob, Emily Potts, Harry Wang, William Anderson"
 date: "2023-12-14"
-output: github_document
+output: pdf_document
 ---
 
 ```{r, message = F, warning = F}
@@ -155,10 +155,11 @@ barplot(prop,
 barplot(race, 
         legend.text=c("Uncontrolled", "Controlled"), 
         ylim=c(0, 1.0),
-        args.legend = list(x = "topright", bty = "n", inset = c(-0.25, -0.2)), 
+        args.legend = list(x = "topright", bty = "n", inset = c(-0.20, -0.2)), 
         main="BP Control by Race",
         ylab = "Proportion",
-        names.arg = c("White", "Black", "Asian", "Hispanic", "Other"))
+        names.arg = c("White", "Black", "Asian", "Hispanic", "Other"),
+        cex.names = 0.6)
 
 svyboxplot(bp_sys_mean~factor(cc_smoke), htsub2, na.rm=TRUE, xlab = "Smoking Status", ylab = "Mean SBP (mmHg)", main = "SBP per Smoking Status")
 
@@ -167,7 +168,7 @@ cvd <- svyby(~bp_uncontrolled_140_90, ~factor(cc_cvd_chd), htsub2, na.rm = T, sv
 barplot(cvd, 
         legend.text=c("Uncontrolled", "Controlled"), 
         ylim=c(0, 1.0),
-        args.legend = list(x = "topright", bty = "n", inset = c(-0.25, -0.1)), 
+        args.legend = list(x = "topright", bty = "n", inset = c(-0.20, -0.1)), 
         main="BP Control by CVD History",
         xlab = "Cardiovascular Disease History",
         ylab = "Proportion")
