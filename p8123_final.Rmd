@@ -232,4 +232,4 @@ model_3 <- svyglm(bp_uncontrolled_140_90 ~ demo_age_cat + demo_race + demo_gende
 summary(model_3)
 ```
 
-
+I added the nested models based on three levels. Should we also make figures based on the significant variables from these models? If these models look good, I will proceed making the table two - Harry
