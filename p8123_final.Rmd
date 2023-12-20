@@ -5,7 +5,7 @@ date: "2023-12-14"
 output: pdf_document
 ---
 
-```{r}
+```{r, message = F, warning = F}
 library(tidyverse)
 library(survey)
 library(ggsurvey)
@@ -100,6 +100,8 @@ svyCreateCatTable(vars= c("bp_med_recommended_jnc7" ,"bp_med_use"),
 
 # didn't they say something in class about the Rao and Scott being wrong in R? not sure if we should include p-values here
 
+# I don't think we should have p-values in the table 1 since we're not running models yet, just showing mean and standard deviation of the different covariates per outcome - Will
+
 reset_gtsummary_theme()
 theme_gtsummary_compact()
 tab1 <- tbl_svysummary(data = htsub2, by = "bp_control_140_90", include = c("demo_age_cat", "demo_gender", "demo_race", "cc_bmi", "cc_ckd", "cc_diabetes", "cc_cvd_any", "bp_med_use", "chol_total", "chol_hdl", "chol_ldl", "chol_trig", "chol_med_use"),
@@ -122,6 +124,49 @@ tab1
 
 
 ```
+
+### Possible Figure 1:
+
+I made a six-panel figure that could serve as our single Figure 1, feel free to change these plots to different things or remove ones we might not need. - Will
+
+```{r}
+
+par(mfrow = c(2, 3))
+
+p1 <- svyhist(~bp_sys_mean, htsub2, main = "Average Systolic Blood Pressure NHANES 2013-2020", xlab = "Average Systolic Blood Pressure (mmHg)")
+
+prop <- svymean(~bp_uncontrolled_140_90, htsub2, na.rm=TRUE)
+
+p2 <- barplot(prop, 
+        ylim=c(0, 1.0),
+        main="Proportion of BP Control NHANES 2013-2020", names.arg = c("BP Uncontrolled", "BP Controlled"),
+        ylab = "Proportion")
+
+p3 <- svyplot(bp_sys_mean~demo_age_years, htsub2, style = "transparent", xlab = "Age (years)", ylab = "Average Systolic Blood Pressure (mmHg)", main = "Survey-Weighted Bubble Plot")
+
+race <- svyby(~bp_uncontrolled_140_90, ~factor(demo_race), htsub2, svymean, na.rm=TRUE)
+
+p4 <- barplot(race, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright", inset = c(-0.5,-0.15), bty = "n"), 
+        main="Proportion of BP Control by Race",
+        ylab = "Proportion")
+
+p5 <- svyboxplot(bp_sys_mean~factor(cc_smoke), htsub2, na.rm=TRUE, xlab = "Smoking Status", ylab = "Average Systolic Blood Pressure (mmHg)", main = "Systolic Blood Pressure per Smoking Status")
+
+cvd <- svyby(~bp_uncontrolled_140_90, ~factor(cc_cvd_chd), htsub2, na.rm = T, svymean)
+
+p6 <- barplot(cvd, 
+        legend.text=c("BP uncontrolled", "BP controlled"), 
+        ylim=c(0, 1.0),
+        args.legend = list(x = "topright", inset = c(-0.5,-0.05), bty = "n"), 
+        main="Proportion of BP Control by CVD History",
+        xlab = "Cardiovascular Disease History",
+        ylab = "Proportion")
+
+```
+
 
 ### Regression models - really don't know which variables to select 
 
