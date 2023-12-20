@@ -160,3 +160,31 @@ summary(meds_continuous)
 ```
 
 The use of blood pressure medications, number of antihypertensive pills (1), and angiotensin receptor blockers were significantly associated with mean systolic blood pressure levels in those with hypertension from 2013-2020. The use of (2-4+) antihypertensive pills per day, vasodilators, alpha and beta blockers, and statins and other cholesterol medications, had non-statistically significant associations with mean systolic blood pressure levels in those with hypertension from 2013-2020. 
+
+## Nested Models
+### Level One Demographic Characteristics.
+```{r}
+model_1 <- svyglm(bp_uncontrolled_140_90 ~ demo_age_cat + demo_race + demo_gender, #demographics
+                  design = htsub2, family=quasibinomial())
+summary(model_1)
+```
+
+### Level Two Health-related Characteristics 
+```{r}
+model_2 <- svyglm(bp_uncontrolled_140_90 ~ demo_age_cat + demo_race + demo_gender + #demographics
+                    cc_smoke + cc_bmi+ cc_diabetes + cc_ckd + cc_cvd_any + chol_trig + chol_ldl + chol_hdl, #health-related
+                  design = htsub2, family=quasibinomial())
+summary(model_2)
+```
+
+### Level Three Medication Use
+```{r}
+model_3 <- svyglm(bp_uncontrolled_140_90 ~ demo_age_cat + demo_race + demo_gender + #demographics
+                    cc_smoke + cc_bmi+ cc_diabetes + cc_ckd + cc_cvd_any + chol_trig + chol_ldl + chol_hdl + #health-related
+                    bp_med_use + bp_med_n_pills + bp_med_vasod + bp_med_alpha + #medication
+                    bp_med_beta + bp_med_angioten + chol_med_statin + chol_med_use, #medication
+                  design = htsub2, family=quasibinomial())
+summary(model_3)
+```
+
+
