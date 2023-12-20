@@ -1,8 +1,8 @@
 ---
-title: "p8123_final"
-author: "Farizah Rob"
+title: "P8123 Final"
+author: "Farizah Rob, Emily Potts, Harry Wang, William Anderson"
 date: "2023-12-14"
-output: pdf_document
+output: github_document
 ---
 
 ```{r, message = F, warning = F}
@@ -15,7 +15,8 @@ library(sjPlot)
 
 knitr::opts_chunk$set(
   message = FALSE,
-  warning = FALSE
+  warning = FALSE,
+  tidy.opts = list(width.cutoff = 60)
 )
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
@@ -139,37 +140,39 @@ I made a six-panel figure that could serve as our single Figure 1, feel free to 
 
 par(mfrow = c(2, 3))
 
-svyhist(~bp_sys_mean, htsub2, main = "Average Systolic Blood Pressure NHANES 2013-2020", xlab = "Average Systolic Blood Pressure (mmHg)")
+svyhist(~bp_sys_mean, htsub2, main = "Mean SBP NHANES 2013-2020", xlab = "Mean SBP (mmHg)")
 
 prop <- svymean(~bp_uncontrolled_140_90, htsub2, na.rm=TRUE)
 
 barplot(prop, 
         ylim=c(0, 1.0),
-        main="Proportion of BP Control NHANES 2013-2020", names.arg = c("BP Uncontrolled", "BP Controlled"),
+        main="BP Control NHANES 2013-2020", names.arg = c("Uncontrolled", "Controlled"),
         ylab = "Proportion")
 
-svyplot(bp_sys_mean~demo_age_years, htsub2, style = "transparent", xlab = "Age (years)", ylab = "Average Systolic Blood Pressure (mmHg)", main = "Survey-Weighted Bubble Plot")
+ svyplot(bp_sys_mean~demo_age_years, htsub2, style = "subsample", xlab = "Age (years)", ylab = "Mean SBP (mmHg)", main = "Subsample Bubble Plot")
 
-race <- svyby(~bp_uncontrolled_140_90, ~factor(demo_race), htsub2, svymean, na.rm=TRUE)
+ race <- svyby(~bp_uncontrolled_140_90, ~factor(demo_race), htsub2, svymean, na.rm=TRUE)
 
 barplot(race, 
-        legend.text=c("BP uncontrolled", "BP controlled"), 
+        legend.text=c("Uncontrolled", "Controlled"), 
         ylim=c(0, 1.0),
-        args.legend = list(x = "topleft", bty = "n"), 
-        main="Proportion of BP Control by Race",
-        ylab = "Proportion")
+        args.legend = list(x = "topright", bty = "n", inset = c(-0.25, -0.2)), 
+        main="BP Control by Race",
+        ylab = "Proportion",
+        names.arg = c("White", "Black", "Asian", "Hispanic", "Other"))
 
-svyboxplot(bp_sys_mean~factor(cc_smoke), htsub2, na.rm=TRUE, xlab = "Smoking Status", ylab = "Average Systolic Blood Pressure (mmHg)", main = "Systolic Blood Pressure per Smoking Status")
+svyboxplot(bp_sys_mean~factor(cc_smoke), htsub2, na.rm=TRUE, xlab = "Smoking Status", ylab = "Mean SBP (mmHg)", main = "SBP per Smoking Status")
 
 cvd <- svyby(~bp_uncontrolled_140_90, ~factor(cc_cvd_chd), htsub2, na.rm = T, svymean)
 
 barplot(cvd, 
-        legend.text=c("BP uncontrolled", "BP controlled"), 
+        legend.text=c("Uncontrolled", "Controlled"), 
         ylim=c(0, 1.0),
-        args.legend = list(x = "topleft", bty = "n"), 
-        main="Proportion of BP Control by CVD History",
+        args.legend = list(x = "topright", bty = "n", inset = c(-0.25, -0.1)), 
+        main="BP Control by CVD History",
         xlab = "Cardiovascular Disease History",
         ylab = "Proportion")
+
 
 ```
 
@@ -245,7 +248,7 @@ This plots estimates and 95% CI for odds ratios from models 1-3 and can be our f
 
 ```{r}
 
-plot_models(model_1, model_2, model_3, transform = "exp", legend.title = "", show.p = T, grid = T, show.legend = F, m.labels = c("Model 1", "Model 2", "Model 3"), axis.labels = c("Uses Cholesterol Meds", "Uses Statins", "Uses Angiotens", "Uses Beta-Blockers", "Uses Alpha-Blockers", "Uses Vasodilators", "BP Meds per day: 4+", "BP Meds per day: 3", "BP Meds per day: 2", "BP Meds per day: 1", "Uses BP Meds", "HDL Chol", "LDL Chol", "Triglycerides", "Has CVD", "Has CKD", "Has Diabetes", "BMI 35+", "BMI 30-35", "BMI 25-30", "Current Smoker", "Former Smoker", "Gender: Female", "Other Race", "Hispanic", "Non-Hispanic Asian", "Non-Hispanic Black", "Ages 75+", "Ages 65-74", "Ages 45-64"), title = "Odds Ratio Estimates for Uncontrolled Blood Pressure", colors = "bw", dot.size = 2.5) + geom_hline(yintercept = 1, linetype = "dashed")
+plot_models(model_1, model_2, model_3, transform = "exp", legend.title = "", show.p = T, grid = T, show.legend = F, m.labels = c("Model 1", "Model 2", "Model 3"), axis.labels = c("Uses Cholesterol Meds", "Uses Statins", "Uses Angiotens", "Uses Beta-Blockers", "Uses Alpha-Blockers", "Uses Vasodilators", "BP Meds per day: 4+", "BP Meds per day: 3", "BP Meds per day: 2", "BP Meds per day: 1", "Uses BP Meds", "HDL Chol", "LDL Chol", "Triglycerides", "Has CVD", "Has CKD", "Has Diabetes", "BMI 35+", "BMI 30-35", "BMI 25-30", "Current Smoker", "Former Smoker", "Gender: Female", "Other Race", "Hispanic", "Non-Hispanic Asian", "Non-Hispanic Black", "Ages 75+", "Ages 65-74", "Ages 45-64"), title = "Odds Ratio Estimates for Uncontrolled Blood Pressure", colors = "bw", dot.size = 1.75) + geom_hline(yintercept = 1, linetype = "dashed")
 
 ```
 
